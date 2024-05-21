@@ -24,6 +24,3 @@ def chat_endpoint():
         return jsonify({'message': response.text}), 200
     else:
         return jsonify({'error': 'No message provided'}), 400
-
-if __name__ == '__main__':
-    app.run(debug=True)
