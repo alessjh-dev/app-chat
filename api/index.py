@@ -1,10 +1,29 @@
-from http.server import BaseHTTPRequestHandler
+import os
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from dotenv import load_dotenv
+import google.generativeai as genai
 
-class handler(BaseHTTPRequestHandler):
+load_dotenv()
+API_KEY = os.getenv('GEMINI_API_KEY')
 
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type','text/plain')
-        self.end_headers()
-        self.wfile.write('Hello, world!'.encode('utf-8'))
-        return
+genai.configure(api_key=API_KEY)
+model = genai.GenerativeModel('gemini-pro')
+chat = model.start_chat(history=[])
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/chat', methods=['POST'])
+def chat_endpoint():
+    data = request.json
+    message = data.get('message')
+
+    if message:
+        response = chat.send_message(message)
+        return jsonify({'message': response.text}), 200
+    else:
+        return jsonify({'error': 'No message provided'}), 400
+
+if __name__ == '__main__':
+    app.run(debug=True)
